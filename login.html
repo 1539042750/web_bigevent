@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大事件-登录/注册</title>
+    <link rel="stylesheet" href="./assets/css/login.css">
+    <link rel="stylesheet" href="./assets/lib/layui/css/layui.css">
+</head>
+
+<body>
+    <!-- 头部模块 -->
+    <div class="layui-main">
+        <img src="./assets/images/logo.png" alt="">
+    </div>
+    <!-- 登录模块 -->
+    <div class="loginAndRegBox">
+        <div class="title-box"></div>
+        <!-- 登录的表单 -->
+        <div class="login-box">
+            <form class="layui-form" id="form-login">
+                <div class="layui-form-item">
+                    <i class="layui-icon layui-icon-username"></i>
+                    <input type="text" name="username" required lay-verify="required" placeholder="请输入用户名"
+                        autocomplete="off" class="layui-input" style="padding-left: 32px;">
+                </div>
+                <div class="layui-form-item">
+                    <i class="layui-icon layui-icon-password"></i>
+                    <input type="password" name="password" required lay-verify="required|pass" placeholder="请输入密码"
+                        autocomplete="off" class="layui-input" style="padding-left: 32px;">
+                </div>
+                <div class="layui-form-item">
+                    <button class="layui-btn layui-btn-fluid layui-btn-normal" lay-submit
+                        lay-filter="formDemo">立即提交</button>
+                </div>
+                <div class="layui-form-item links">
+                    <a href="javascript:;" id="link_reg">去注册账号</a>
+                </div>
+            </form>
+        </div>
+        <!-- 注册模块 -->
+        <div class="reg-box">
+            <form class="layui-form" id="form_reg">
+                <div class="layui-form-item">
+                    <i class="layui-icon layui-icon-username"></i>
+                    <input type="text" name="username" required lay-verify="required" placeholder="请输入用户名"
+                        autocomplete="off" class="layui-input" style="padding-left: 32px;">
+                </div>
+                <div class="layui-form-item">
+                    <i class="layui-icon layui-icon-password"></i>
+                    <input type="password" name="password" required lay-verify="required|pass" placeholder="请输入密码"
+                        autocomplete="off" class="layui-input" style="padding-left: 32px;">
+                </div>
+                <div class="layui-form-item">
+                    <i class="layui-icon layui-icon-password"></i>
+                    <input type="password" name="repassword" required lay-verify="required|pass|repass"
+                        placeholder="再次确认密码" autocomplete="off" class="layui-input" style="padding-left: 32px;">
+                </div>
+                <div class="layui-form-item">
+                    <button class="layui-btn layui-btn-fluid layui-btn-normal" lay-submit
+                        lay-filter="formDemo">立即提交</button>
+                </div>
+                <div class="layui-form-item links">
+                    <a href="javascriot:;" id="link_login">去登录</a>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+    <script src="./assets/lib/jquery.js"></script>
+    <script src="./assets/js/baseAPI.js"></script>
+    <script src="./assets/lib/layui/layui.all.js"></script>
+    <script>
+        $('#link_reg').on('click', function () {
+            $('.login-box').hide()
+            $('.reg-box').show()
+        })
+        $('#link_login').on('click', function () {
+            $('.reg-box').hide()
+            $('.login-box').show()
+        })
+
+        // 定义校验
+        let form = layui.form
+        let layer = layui.layer
+        form.verify({
+            pass: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ],
+            repass: function (value) {
+                let pass = $('.reg-box [name=password]').val()
+                if (pass !== value) {
+                    return '两次密码不一致'
+                }
+            }
+        })
+        //注册模块
+        $('#form_reg').on('submit', function (e) {
+            e.preventDefault()
+            let data = {
+                username: $('#form_reg [name=username]').val(),
+                password: $('#form_reg [name=password]').val()
+            }
+            $.post('/api/reguser', data,
+                function (res) {
+                    if (res.status !== 0) {
+                        return layer.msg(res.message)
+                    }
+                    layer.msg('注册成功!请登录')
+                    $('#link_login').click()
+                })
+        })
+        //登录模块
+        $('#form-login').submit(function (e) {
+            e.preventDefault()
+            let data = $(this).serialize()
+            $.post('/api/login', data, function (res) {
+                if (res.status !== 0) {
+                    return layer.msg('登录失败!')
+                }
+                layer.msg('登陆成功!')
+                //把权限认证的token储存到本地存储
+                localStorage.setItem('token', res.token)
+                //跳转页面
+                location.href = './index.html'
+            })
+        })
+    </script>
+</body>
+
+</html>
